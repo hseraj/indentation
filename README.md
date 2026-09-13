@@ -209,8 +209,11 @@ indentation_project/
 ## References
 
 [1] I.N. Sneddon, *The relation between load and penetration in the axisymmetric boussinesq problem for a punch of arbitrary profile*, International Journal of Engineering Science 3(1) (1965) 47-57.
+
 [2] G.M. Pharr, W.C. Oliver, F.R. Brotzen, *On the generality of the relationship among contact stiffness, contact area, and elastic modulus during indentation*, Journal of Materials Research 7(3) (1992) 613-617.
+
 [3] J. Alcaraz, L. Buscemi, M. Grabulosa, X. Trepat, B. Fabry, R. Farré, D. Navajas, *Microrheology of Human Lung Epithelial Cells Measured by Atomic Force Microscopy*, Biophysical Journal 84(3) (2003) 2071-2079.
+
 [4] F. Rico, P. Roca-Cusachs, N. Gavara, R. Farré, M. Rotger, D. Navajas, *Probing mechanical properties of living cells by atomic force microscopy with blunted pyramidal cantilever tips*, Physical Review E 72(2) (2005) 021914.
 
 ## Citation
