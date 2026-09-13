@@ -1,0 +1,39 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the associated article below."
+title: "indentation: A Python package for viscoelastic model identification"
+authors:
+  - family-names: "Seraj"
+    given-names: "Hasan"
+    orcid: "https://orcid.org/0000-0003-0007-6833"
+  - family-names: "Azadi"
+    given-names: "Mojtaba"
+    orcid: "https://orcid.org/0000-0002-0039-7664"
+  - family-names: "Sokolov"
+    given-names: "Igor"
+version: "0.1.0"
+date-released: "2026-09-13"
+license: MIT
+repository-code: "https://github.com/hseraj/indentation"
+keywords:
+  - viscoelasticity
+  - indentation
+  - parameter-identification
+  - rheology
+  - python
+  - prony-series
+  - standard-linear-solid
+  - stress-relaxation
+  - inverse-problem
+
+preferred-citation:
+  type: article
+  title: "Unpacking Variations of Elastic Modulus in Time and Frequency Domain Detected by Indentation: Review of Models, Errors, Experimental Insights and Nonlinearity Considerations"
+  authors:
+    - family-names: "Azadi"
+      given-names: "Mojtaba"
+    - family-names: "Seraj"
+      given-names: "Hasan"
+    - family-names: "Sokolov"
+      given-names: "Igor"
+  year: 2025
+  url: "https://dx.doi.org/10.2139/ssrn.5464116"

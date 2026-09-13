@@ -1,0 +1,57 @@
+name: Build and Release Standalone Executables
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # This creates a matrix of 3 different operating systems
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        
+    steps:
+      # 1. Download the code into the virtual machine
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      # 3. Install the package and PyInstaller
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .
+          pip install pyinstaller
+
+      # 4. Build the standalone executable using PyInstaller
+      - name: Build executable
+        run: pyinstaller --noconsole --onefile --name Indentation indentation/gui.py
+
+      # 5. Compress the Mac/Linux files (to preserve executable permissions)
+      - name: Zip executable (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: tar -czf Indentation-v0.1.0-${{ runner.os }}.tar.gz -C dist Indentation
+
+      # 6. Compress the Windows file
+      - name: Zip executable (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist/Indentation.exe -DestinationPath Indentation-v0.1.0-Windows.zip
+
+      # 7. Upload the files to the GitHub Release page automatically
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            Indentation-v0.1.0-Windows.zip
+            Indentation-v0.1.0-${{ runner.os }}.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

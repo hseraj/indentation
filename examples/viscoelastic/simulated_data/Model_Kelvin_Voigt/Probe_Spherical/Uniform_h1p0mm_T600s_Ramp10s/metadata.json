@@ -1,0 +1,15 @@
+{
+  "Condition": "Uniform_h1p0mm_T600s_Ramp10s",
+  "Probe": "Spherical",
+  "Probe_Params": {
+    "nu": 0.5,
+    "R": 0.002
+  },
+  "Model": "Kelvin_Voigt",
+  "Files": {
+    "E_2p0MPa_eta_1p0MPa_s.csv": {
+      "E [Pa]": 2000000.0,
+      "eta [Pa.s]": 1000000.0
+    }
+  }
+}

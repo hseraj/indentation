@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "indentation"
+version = "0.1.0"
+description = "A Python package for evaluating parameters of viscoelastic models in indentation tests."
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+
+authors = [
+  { name = "Hasan Seraj", email = "hasan.seraj25@gmail.com" },
+  { name = "Mojtaba Azadi" },
+  { name = "Igor Sokolov" }
+]
+
+keywords = [
+  "viscoelasticity",
+  "indentation",
+  "parameter-identification",
+  "rheology",
+  "python",
+  "prony-series",
+  "standard-linear-solid",
+  "stress-relaxation",
+  "inverse-problem"
+]
+
+# PyPI Classifiers help categorize the project
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Topic :: Scientific/Engineering :: Physics",
+  "License :: OSI Approved :: MIT License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: OS Independent"
+]
+
+dependencies = [
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "matplotlib>=3.7",
+    "pandas>=2.0",
+    "openpyxl>=3.1"
+]
+
+[project.scripts]
+indentation-cli = "indentation.cli:main"
+indentation-gui = "indentation.gui:main"
+
+[project.urls]
+"Homepage" = "https://github.com/hseraj/indentation"
+"Bug Tracker" = "https://github.com/hseraj/indentation/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]

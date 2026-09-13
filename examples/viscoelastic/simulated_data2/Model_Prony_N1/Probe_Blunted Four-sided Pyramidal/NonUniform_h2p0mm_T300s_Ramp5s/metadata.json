@@ -1,0 +1,16 @@
+{
+  "Condition": "NonUniform_h2p0mm_T300s_Ramp5s",
+  "Probe": "Blunted Four-sided Pyramidal",
+  "Probe_Params": {
+    "nu": 0.5,
+    "theta_deg": 30.0
+  },
+  "Model": "Prony_N1",
+  "Files": {
+    "Einf_1p0_E1_2p0_t1_0p5.csv": {
+      "E_inf [Pa]": 1000000.0,
+      "E1 [Pa]": 2000000.0,
+      "tau1 [s]": 0.5
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "Condition": "Uniform_h1p0mm_T600s_Ramp10s",
+  "Probe": "Conical",
+  "Probe_Params": {
+    "nu": 0.5,
+    "theta_deg": 30.0
+  },
+  "Model": "Kelvin_Voigt",
+  "Files": {
+    "E_0p5MPa_eta_2p0MPa_s.csv": {
+      "E [Pa]": 500000.0,
+      "eta [Pa.s]": 2000000.0
+    }
+  }
+}

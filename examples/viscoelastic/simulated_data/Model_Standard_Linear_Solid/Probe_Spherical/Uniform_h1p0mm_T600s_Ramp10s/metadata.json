@@ -1,0 +1,16 @@
+{
+  "Condition": "Uniform_h1p0mm_T600s_Ramp10s",
+  "Probe": "Spherical",
+  "Probe_Params": {
+    "nu": 0.5,
+    "R": 0.002
+  },
+  "Model": "Standard_Linear_Solid",
+  "Files": {
+    "E1_2p0MPa_E2_3p0MPa_tau_2p0s.csv": {
+      "E1 [Pa]": 2000000.0,
+      "E2 [Pa]": 3000000.0,
+      "tau [s]": 2.0
+    }
+  }
+}

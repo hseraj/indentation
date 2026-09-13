@@ -1,0 +1,15 @@
+{
+  "Condition": "NonUniform_h2p0mm_T300s_Ramp5s",
+  "Probe": "Spherical",
+  "Probe_Params": {
+    "nu": 0.5,
+    "R": 0.002
+  },
+  "Model": "Kelvin_Voigt",
+  "Files": {
+    "E_0p5MPa_eta_2p0MPa_s.csv": {
+      "E [Pa]": 500000.0,
+      "eta [Pa.s]": 2000000.0
+    }
+  }
+}
