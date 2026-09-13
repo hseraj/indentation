@@ -8,7 +8,7 @@ Whether you are characterizing soft hydrogels, biological tissues, or stiff poly
 
 The package solves the inverse problem of finding the relaxation modulus $E(t)$ that best fits the experimental indentation force $F(t)$. The forward model is based on the Boltzmann superposition principle (hereditary integral) for a rigid indenter of arbitrary geometry:
 
-$$ F(t) = C \int_0^t E(t-\tau) \frac{d}{d\tau} [h(\tau)]^n d\tau $$
+$$ F(t) = C \int_0^t E(t-\tau) \frac{d}{d\tau} [h(\tau)^n] d\tau $$
 
 Where:
 - $C$ and $n$ are the contact coefficient and displacement exponent, respectively (dependent on probe geometry).
