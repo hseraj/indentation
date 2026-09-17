@@ -1,6 +1,6 @@
 from indentation.core import run_fit, run_batch_fit
 from indentation.io import load_data, save_results, save_batch_summary, MissingTimeRateError
-from indentation.plotting import plot_comparison
+from indentation.plotting import plot_comparison, plot_frequency_domain
 from indentation.probes import get_probe_geometry
 from indentation.viscoelastic.models import MODELS
 
@@ -12,8 +12,9 @@ __all__ = [
     "save_batch_summary",
     "MissingTimeRateError",
     "plot_comparison", 
+    "plot_frequency_domain", 
     "get_probe_geometry", 
     "MODELS"
 ]
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"

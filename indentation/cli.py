@@ -3,9 +3,9 @@ import sys
 import os
 from indentation.core import run_fit, run_batch_fit
 from indentation.io import load_data, save_results, save_batch_summary, MissingTimeRateError
-from indentation.plotting import plot_comparison
 from indentation.probes import get_probe_geometry
 from indentation.viscoelastic.models import MODELS
+from indentation.plotting import plot_comparison, plot_frequency_domain
 
 def get_float_input(prompt, default):
     while True:
@@ -64,8 +64,9 @@ def get_shared_settings():
     S_VALS = np.sort(np.unique(np.logspace(np.log10(s_min), np.log10(s_max), 110)))
 
     refine = input("Run full-data refinement? (y/n): ").strip().lower() == 'y'
+    freq_max = get_float_input("Enter max frequency for dynamic modulus (Hz)", 1000.0)
 
-    return model_name, C, h_power_exp, S_VALS, time_window, refine, smooth_window
+    return model_name, C, h_power_exp, S_VALS, time_window, refine, smooth_window, freq_max
 
 def run_single():
     """Workflow for processing a single data file."""
@@ -83,8 +84,8 @@ def run_single():
         except Exception as e:
             print(f"Error: {e}")
 
-    model_name, C, h_power_exp, S_VALS, time_window, refine, smooth_window = get_shared_settings()
-
+    model_name, C, h_power_exp, S_VALS, time_window, refine, smooth_window, freq_max = get_shared_settings()
+    
     print("\nRunning pipeline...")
     
     results = run_fit(
@@ -94,7 +95,8 @@ def run_single():
         S_VALS=S_VALS,
         time_window=time_window,
         refine_full_data=refine,
-        smooth_window=smooth_window
+        smooth_window=smooth_window,
+        freq_max=freq_max
     )
 
     # Print and Save Results
@@ -119,7 +121,8 @@ def run_single():
     if not out_dir: out_dir = "prediction_results"
         
     save_results(results, model_name, t_full, F_full, output_dir=out_dir)
-    plot_comparison(results, t_full, F_full, model_name, output_dir=out_dir)
+    plot_comparison(results, t_full, h_full, F_full, model_name, output_dir=out_dir)
+    plot_frequency_domain(results, model_name, output_dir=out_dir)
     print(f"\nComputation complete. Check the '{out_dir}' folder.")
 
 def run_batch():
@@ -132,12 +135,13 @@ def run_batch():
     out_dir = input("Enter output folder for batch results [Press Enter for default 'batch_results']: ").strip()
     if not out_dir: out_dir = "batch_results"
 
-    model_name, C, h_power_exp, S_VALS, time_window, refine, smooth_window = get_shared_settings()
+    model_name, C, h_power_exp, S_VALS, time_window, refine, smooth_window, freq_max = get_shared_settings()
     
     # Ask for loading rate in case the folder contains 2-column files
     time_rate_str = input("If files have 2 columns, enter loading rate (Press Enter to assume 1.0): ").strip()
     time_rate = float(time_rate_str) if time_rate_str else 1.0
 
+    
     print(f"\nStarting Batch Processing...")
     
     # Run the batch loop
@@ -150,7 +154,8 @@ def run_batch():
         refine_full_data=refine,
         smooth_window=smooth_window,
         output_dir=out_dir,
-        time_rate=time_rate
+        time_rate=time_rate,
+        freq_max=freq_max
     )
 
     # Save the final summary with statistics

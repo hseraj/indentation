@@ -1,7 +1,8 @@
 import numpy as np
 from scipy.signal import savgol_filter
 from indentation.viscoelastic import fitting
-from indentation.transforms import rmse, relerr, r2_score, nrmse, log_rmse, rmsre, compute_h_power_and_dh
+from indentation.transforms import rmse, relerr, r2_score, nrmse, log_rmse, rmsre, compute_h_power_and_dh, calculate_frequency_domain
+from indentation.plotting import plot_comparison, plot_frequency_domain
 
 FUNCTION_MAP: dict[str, dict[str, object]] = {
     "Elastic_Spring": {"td": fitting.fit_elastic_td, "lp": fitting.fit_elastic_lp},
@@ -45,7 +46,7 @@ def compute_full_force(model_name: str, params: dict, t_full: np.ndarray, h_full
         return fitting.compute_force(lambda tv: params["E_inf [Pa]"] + params["E1 [Pa]"] * np.exp(-tv / params["tau1 [s]"]) + params["E2 [Pa]"] * np.exp(-tv / params["tau2 [s]"]) + params["E3 [Pa]"] * np.exp(-tv / params["tau3 [s]"]), t_full, h_full, dt_full, C, h_power_exp, h_power=h_power, dh=dh)
     raise ValueError(f"Unknown model: {model_name}")
 
-def run_fit(model_name: str, t_full: np.ndarray, h_full: np.ndarray, F_full: np.ndarray, C: float, h_power_exp: float, S_VALS: np.ndarray, time_window: float | None = None, refine_full_data: bool = False, smooth_window: int = 0) -> list[dict]:
+def run_fit(model_name: str, t_full: np.ndarray, h_full: np.ndarray, F_full: np.ndarray, C: float, h_power_exp: float, S_VALS: np.ndarray, time_window: float | None = None, refine_full_data: bool = False, smooth_window: int = 0, freq_min: float = 0.001, freq_max: float = 1000.0) -> list[dict]:
     """
     Main pipeline to run Laplace and Time-Domain fits.
     """
@@ -109,7 +110,15 @@ def run_fit(model_name: str, t_full: np.ndarray, h_full: np.ndarray, F_full: np.
         refine_result.update(get_all_metrics(Fm_refine, F_full))
         results.append(refine_result)
 
+    # 4. Sort and return (Use RMSE as it is stable for forces that decay to zero)
     results_sorted = sorted(results, key=lambda x: x['RMSE_N'])
+    
+    # 5. Calculate Frequency Domain Data for all methods (using s = i*omega)
+    # We use a logarithmic frequency sweep based on user input
+    freq_hz = np.sort(np.unique(np.logspace(np.log10(freq_min), np.log10(freq_max), 100)))
+    for res in results_sorted:
+        res["Frequency_Data"] = calculate_frequency_domain(res["model"], res["parameters"], freq_hz)
+        
     return results_sorted
     
     
@@ -118,7 +127,7 @@ import glob
 from indentation.io import load_data, save_results
 from indentation.plotting import plot_comparison
 
-def run_batch_fit(model_name: str, folder_path: str, C: float, h_power_exp: float, S_VALS: np.ndarray, time_window: float | None = None, refine_full_data: bool = False, smooth_window: int = 0, output_dir: str = "batch_results", time_rate: float | None = None) -> list[dict]:
+def run_batch_fit(model_name: str, folder_path: str, C: float, h_power_exp: float, S_VALS: np.ndarray, time_window: float | None = None, refine_full_data: bool = False, smooth_window: int = 0, output_dir: str = "batch_results", time_rate: float | None = None, freq_max: float = 1000.0) -> list[dict]:
     """
     Scans a folder for CSV/Excel files and processes them in batch.
     Returns a list of summary dictionaries for the batch summary.
@@ -147,7 +156,8 @@ def run_batch_fit(model_name: str, folder_path: str, C: float, h_power_exp: floa
                 S_VALS=S_VALS,
                 time_window=time_window,
                 refine_full_data=refine_full_data,
-                smooth_window=smooth_window
+                smooth_window=smooth_window,
+                freq_max=freq_max
             )
             
             best = results[0]
@@ -157,7 +167,8 @@ def run_batch_fit(model_name: str, folder_path: str, C: float, h_power_exp: floa
             ind_dir = os.path.join(output_dir, file_stem)
             
             save_results(results, model_name, t_full, F_full, output_dir=ind_dir)
-            plot_comparison(results, t_full, F_full, model_name, output_dir=ind_dir)
+            plot_comparison(results, t_full, h_full, F_full, model_name, output_dir=ind_dir)
+            plot_frequency_domain(results, model_name, output_dir=ind_dir)
             
             # Collect the best data for the batch summary
             summary = {

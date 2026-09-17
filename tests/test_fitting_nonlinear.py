@@ -24,14 +24,14 @@ def test_sls_pipeline():
     # 2. Run Laplace Fit (Only used to generate warm-start guesses)
     S_VALS = np.sort(np.unique(np.logspace(-3, 3, 110)))
     lp_res = fit_sls_lp(t_arr, h_arr, F_data, dt, C, h_power_exp, S_VALS)
-    print(f"[PASS] SLS Laplace Fit executed (Warm-start E1={lp_res['parameters']['E1']:.2f}, tau={lp_res['parameters']['tau']:.2f})")
+    print(f"[PASS] SLS Laplace Fit executed (Warm-start E1={lp_res['parameters']['E1 [Pa]']:.2f}, tau={lp_res['parameters']['tau [s]']:.2f})")
     
     # 3. Run Time-Domain Fit with Warm-Start
     td_res = fit_sls_td(t_arr, h_arr, F_data, dt, C, h_power_exp, lp_params=lp_res["parameters"])
     
-    td_E1 = td_res["parameters"]["E1"]
-    td_E2 = td_res["parameters"]["E2"]
-    td_tau = td_res["parameters"]["tau"]
+    td_E1 = td_res["parameters"]["E1 [Pa]"]
+    td_E2 = td_res["parameters"]["E2 [Pa]"]
+    td_tau = td_res["parameters"]["tau [s]"]
     
     # Time-Domain should be extremely accurate (within 1% relative error)
     if np.isclose(td_E1, E1_true, rtol=0.01) and np.isclose(td_E2, E2_true, rtol=0.01) and np.isclose(td_tau, tau_true, rtol=0.01):

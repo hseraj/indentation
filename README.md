@@ -1,6 +1,6 @@
 # Indentation
 
-A Python package for evaluating parameters of viscoelastic models in indentation tests. It uses a fast Laplace-domain estimation as a warm-start for a highly accurate Time-Domain (hereditary integral) optimization, achieving scale-invariant fitting via log10-parameter transformation.
+A Python package for evaluating parameters of viscoelastic models in indentation tests. It uses a fast Laplace-domain estimation as a warm-start for a highly accurate Time-Domain (hereditary integral) optimization, achieving scale-invariant fitting via log10-parameter transformation. The package also features a complete rheological suite, converting time-domain relaxation data into frequency-domain master curves (Storage modulus, Loss modulus, and Damping ratio).
 
 Whether you are characterizing soft hydrogels, biological tissues, or stiff polymers, this package provides a rigorous, mathematically robust pipeline to extract viscoelastic properties from raw experimental data.
 
@@ -40,6 +40,15 @@ The relaxation modulus $E(t)$ is parameterized using standard rheological models
 
 *(Note: $H(t)$ is the Heaviside step function and $\delta(t)$ is the Dirac delta function).*
 
+## Frequency Domain Analysis
+
+In addition to time-domain fitting, the package automatically converts the extracted relaxation modulus $E(t)$ into the frequency domain. By substituting $s = i\omega$ into the Carson transform, the package calculates the complex dynamic modulus $E^*(i\omega) = E'(\omega) + i E''(\omega)$. The following rheological properties are computed and exported:
+- **Storage Modulus** $E'(\omega)$
+- **Loss Modulus** $E''(\omega)$
+- **Magnitude** $|E^*|$
+- **Loss Tangent** $\tan \delta = E'' / E'$
+- **Damping Ratio** $\zeta = \tan \delta / 2$
+
 ## Key Features
 
 - **8 Rheological Models**: Elastic Spring, Dashpot, Kelvin-Voigt, Maxwell, Standard Linear Solid (SLS), and generalized Prony Series (N=1, 2, 3).
@@ -47,7 +56,7 @@ The relaxation modulus $E(t)$ is parameterized using standard rheological models
 - **Two-Stage Optimization Pipeline**: 
   1. **Laplace Domain**: Computes the Carson transform to rapidly estimate a global solution without initial user guesses.
   2. **Time-Domain**: Uses the Laplace solution as a warm-start for a highly accurate FFT-based hereditary integral optimization.
-- **Scale-Invariant Fitting**: Log10-parameter optimization ensures stable convergence across magnitudes, preventing failures when fitting soft (kPa) or stiff (GPa) materials.
+- **Scale-Invariant Fitting**: Log10-parameter optimization ensures stable convergence across magnitudes, preventing failures when fitting soft (kPa) or stiff (GPa) materials. Parameter bounds are set up to 1 TPa to accommodate any material.
 - **Robust Noise Handling**: Utilizes analytical Savitzky-Golay derivatives (`deriv=1`) to mathematically suppress high-frequency noise in the displacement signal without introducing numerical discretization errors.
 - **Statistical Rigor**: Automatically calculates and reports Standard Error and 95% Confidence Intervals (CI) for all fitted Time-Domain parameters using the covariance matrix and log-space Hessian.
 - **Comprehensive I/O**:
@@ -120,14 +129,19 @@ results = run_fit(
     C=C, h_power_exp=h_power_exp,
     S_VALS=S_VALS,
     smooth_window=15, # Use analytical SG derivative for noisy data
-    refine_full_data=True
+    refine_full_data=True,
+    freq_max=1000.0   # Max frequency (Hz) for dynamic modulus calculation
 )
 
-# 4. Get best parameters
+# 4. Get best parameters and frequency data
 best = results[0]
 print(f"Best method: {best['method']}")
 print(f"Parameters: {best['parameters']}")
-print(f"95% CI: {best.get('CI', {}).get('95%_CI')}")
+print(f"95% CI: {best.get('CI', {}).get('95%_CI')}0
+
+# Access frequency domain data
+freq_data = best["Frequency_Data"]
+print(f"Storage Modulus at max freq: {freq_data['Storage_Modulus_Pa'][-1]:.2f} Pa")
 ```
 
 ## Outputs
@@ -136,7 +150,9 @@ For every processed file, the package generates a comprehensive set of outputs i
 - **`model_comparison_table.txt`**: A clean, human-readable summary of metrics and parameters (with `±` CI).
 - **`detailed_results.json`**: Machine-readable output containing all parameters, metrics, and covariance data.
 - **`summary_results.csv` & `full_results.xlsx` & `force_comparison.csv`**: Tabular data of the summary and a sheet containing the Time, Experimental Force, and Model Force arrays for easy plotting in Origin or MATLAB.
-- **`comparison_plots.png`**: A high-quality 2-panel matplotlib figure showing the Force vs. Time fit and the Residuals.
+- **`frequency_domain_data.csv`**: Tabular data containing the Frequency, Angular Frequency, Storage Modulus, Loss Modulus, Magnitude, Loss Tangent, and Damping Ratio for all fitted methods.
+- **`comparison_plots.png`**: A comprehensive 3x2 matplotlib figure showing: (1) All Methods vs Experimental Force, (2) Extracted Relaxation Modulus E(t), (3) Best Method vs Experimental Force, (4) Force vs. Displacement, (5) Absolute Residuals, and (6) Relative Error (%).
+- **`frequency_master_plots.png`**: A high-quality 2x2 matplotlib figure showing: (1) Dynamic Modulus Master Curve (E', E'', |E*| vs Angular Frequency), (2) Damping Characteristics (tan δ, ζ), (3) Cole-Cole Plot (E'' vs E'), and (4) Time-Frequency Equivalence (E(t) vs E' vs 1/ω).
 
 ## Benchmark Dataset Generator
 
@@ -159,9 +175,9 @@ indentation_project/
 │   ├── __init__.py               # Public API exports
 │   ├── core.py                   # Main pipeline (run_fit) & batch loop
 │   ├── io.py                     # Robust CSV/Excel loading & saving
-│   ├── plotting.py               # Matplotlib comparison & residual plots
+│   ├── plotting.py               # Matplotlib 3x2 time-domain & 2x2 frequency-domain plots
 │   ├── cli.py                    # Interactive Single/Batch command-line menu
-│   ├── transforms.py             # FFT convolution, analytical SG derivatives, metrics
+│   ├── transforms.py             # FFT convolution, analytical SG derivatives, metrics, frequency domain
 │   ├── optimize.py               # Log10 <-> Physical space conversions
 │   ├── probes.py                 # Probe geometry contact coefficients
 │   ├── gui.py                    # Tkinter GUI application source code
@@ -181,6 +197,7 @@ indentation_project/
 │   ├── test_fitting_closed.py    # Validates Elastic, Dashpot, Kelvin-Voigt closed-form fitting
 │   ├── test_fitting_nonlinear.py # Validates Maxwell & SLS optimization with warm-start
 │   ├── test_fitting_prony.py     # Validates Prony N=1, N=2, N=3 fitting pipelines
+│   ├── test_frequency_domain.py  # Validates frequency domain math and limits
 │   └── test_core_pipeline.py     # End-to-end validation of the Laplace -> TD -> Refinement logic
 │
 ├── examples/                     # Tutorials, benchmark datasets, and outputs
@@ -190,8 +207,6 @@ indentation_project/
 │       ├── basic_fit2.py                # Python API tutorial (noisy data & smoothing application)
 │       ├── generate_simulated_data.py   # Benchmark generator (Dashpot, KV, Maxwell, SLS for Spherical/Conical)
 │       ├── generate_simulated_data2.py  # Benchmark generator (Prony series for Cylindrical/Pyramidal probes)
-│       ├── basic_fit output/            # Output folder generated by basic_fit.py
-│       ├── basic_fit2 output/           # Output folder generated by basic_fit2.py
 │       ├── simulated_data/              # Benchmark datasets & verified fitting results (Dashpot, KV, Maxwell, SLS)
 │       └── simulated_data2/             # Benchmark datasets & verified fitting results (Prony series)
 │

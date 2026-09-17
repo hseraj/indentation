@@ -7,7 +7,7 @@ matplotlib.use('Agg')  # Use non-interactive backend for testing
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from indentation.plotting import plot_comparison
+from indentation.plotting import plot_comparison, plot_frequency_domain
 
 def test_plotting():
     """Test plot generation."""
@@ -16,21 +16,27 @@ def test_plotting():
     
     # Dummy data
     t_full = np.linspace(0, 10, 100)
+    h_full = 0.1 * t_full  # Added dummy displacement
     F_full = 100 * t_full
     
-    # Dummy results
+    # Dummy results (Now includes model and parameters for the E(t) plot)
     results = [
         {
+            "model": "Elastic_Spring",
             "method": "Time-Domain",
+            "parameters": {"E [Pa]": 1e6},
             "F_model": F_full * 0.98,  # Slightly off
         },
         {
+            "model": "Elastic_Spring",
             "method": "Laplace",
+            "parameters": {"E [Pa]": 0.95e6},
             "F_model": F_full * 0.95,  # More off
         }
     ]
     
-    plot_path = plot_comparison(results, t_full, F_full, "DummyModel", output_dir=test_dir)
+    # Pass h_full into the function call
+    plot_path = plot_comparison(results, t_full, h_full, F_full, "Elastic_Spring", output_dir=test_dir)
     
     if not os.path.exists(plot_path):
         print("[FAIL] Plot file was not created.")
@@ -43,8 +49,9 @@ def test_plotting():
         print(f"[FAIL] Plot file is too small ({file_size} bytes)")
         sys.exit(1)
         
+    # Cleanup
     shutil.rmtree(test_dir)
 
 if __name__ == "__main__":
     test_plotting()
-    print("\nTask 11 (plotting.py) Complete and Verified!")
+    print("\nTask 11 (Plotting) Complete and Verified!")

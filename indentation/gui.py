@@ -7,14 +7,14 @@ import pandas as pd
 
 from indentation.core import run_fit, run_batch_fit
 from indentation.io import load_data, save_results, save_batch_summary, MissingTimeRateError
-from indentation.plotting import plot_comparison
+from indentation.plotting import plot_comparison, plot_frequency_domain
 from indentation.probes import get_probe_geometry
 from indentation.viscoelastic.models import MODELS
 
 class IndentationGUI:
     def __init__(self, root):
         self.root = root
-        self.root.title("Indentation v0.1.0")
+        self.root.title("Indentation v0.2.0")
         self.root.geometry("800x700")
         
         self.create_widgets()
@@ -84,6 +84,11 @@ class IndentationGUI:
         ttk.Label(param_frame, text="Loading Rate (m/s) [if 2-col]:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
         self.rate_var = tk.StringVar(value="1.0e-4")
         ttk.Entry(param_frame, textvariable=self.rate_var, width=10).grid(row=3, column=1, sticky="w", padx=5, pady=5)
+        
+        # Max frequency for dynamic modulus calculation
+        ttk.Label(param_frame, text="Max Freq (Hz) for E*(ω):").grid(row=3, column=2, padx=5, pady=5, sticky="e")
+        self.freq_var = tk.StringVar(value="1000.0")
+        ttk.Entry(param_frame, textvariable=self.freq_var, width=10).grid(row=3, column=3, sticky="w", padx=5, pady=5)
         
         # Move Refinement checkbox to row 4 and span it across all columns
         self.refine_var = tk.BooleanVar(value=True)
@@ -163,12 +168,15 @@ class IndentationGUI:
                     t_full, h_full, F_full = load_data(self.input_path.get(), time_rate=rate)
                     
                 self.log("Running fit...")
+                
+                freq_max = float(self.freq_var.get())
                 results = run_fit(
                     model_name=model_name,
                     t_full=t_full, h_full=h_full, F_full=F_full,
                     C=C, h_power_exp=h_power_exp,
                     S_VALS=S_VALS, time_window=tw,
-                    refine_full_data=refine, smooth_window=sw
+                    refine_full_data=refine, smooth_window=sw,
+                    freq_max=freq_max
                 )
                 
                 self.log("\n--- RESULTS ---")
@@ -183,12 +191,15 @@ class IndentationGUI:
                             self.log(f"  {k:<15} = {v:.4e}    (CI: N/A)")
                             
                 save_results(results, model_name, t_full, F_full, output_dir=out_dir)
-                plot_comparison(results, t_full, F_full, model_name, output_dir=out_dir)
+                plot_comparison(results, t_full, h_full, F_full, model_name, output_dir=out_dir)
+                plot_frequency_domain(results, model_name, output_dir=out_dir)
                 self.log(f"\nComplete! Results saved to: {os.path.abspath(out_dir)}")
                 
             else:
                 self.log(f"Starting batch processing on folder: {self.input_path.get()}")
                 rate = float(self.rate_var.get())
+                
+                freq_max = float(self.freq_var.get())
                 batch_summary = run_batch_fit(
                     model_name=model_name,
                     folder_path=self.input_path.get(),
@@ -196,7 +207,8 @@ class IndentationGUI:
                     S_VALS=S_VALS, time_window=tw,
                     refine_full_data=refine, smooth_window=sw,
                     output_dir=out_dir,
-                    time_rate=rate
+                    time_rate=rate,
+                    freq_max=freq_max
                 )
                 if batch_summary:
                     save_batch_summary(batch_summary, output_dir=out_dir)

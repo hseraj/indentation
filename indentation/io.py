@@ -8,7 +8,7 @@ class MissingTimeRateError(Exception):
     pass
 
 def _get_long_path(path: str) -> str:
-    """Bypass Windows 260-character path limit by prepending \\?\."""
+    r"""Bypass Windows 260-character path limit by prepending \\?\."""
     if os.name == 'nt' and not path.startswith('\\\\?\\'):
         return '\\\\?\\' + os.path.abspath(path)
     return path
@@ -143,7 +143,8 @@ def save_results(results: list[dict], model_name: str, t_full: np.ndarray, F_ful
     json_data = []
     metric_keys = ["RMSE_N", "RelErr_%", "R2", "NRMSE_%", "Log_RMSE", "RMSRE"]
     for r in results:
-        temp = {k: v for k, v in r.items() if k != 'F_model'}
+        # Exclude F_model and Frequency_Data (they contain numpy arrays and are saved to CSV/Excel)
+        temp = {k: v for k, v in r.items() if k not in ['F_model', 'Frequency_Data']}
         temp['parameters'] = {k: float(v) for k, v in r['parameters'].items()}
         for mk in metric_keys:
             if mk in temp:
@@ -188,9 +189,26 @@ def save_results(results: list[dict], model_name: str, t_full: np.ndarray, F_ful
     df_force = pd.DataFrame(force_data)
     df_force.to_csv(os.path.join(output_dir, "force_comparison.csv"), index=False)
     
-    with pd.ExcelWriter(os.path.join(output_dir, "full_results.xlsx")) as writer:
-        df_summary.to_excel(writer, sheet_name="Summary", index=False)
-        df_force.to_excel(writer, sheet_name="Force_Data", index=False)
+    # 3c. Save Frequency Domain Data to CSV and Excel
+    freq_data_list = []
+    for r in results:
+        if "Frequency_Data" in r:
+            df_freq = pd.DataFrame(r["Frequency_Data"])
+            df_freq["Method"] = r["method"]
+            freq_data_list.append(df_freq)
+            
+    if freq_data_list:
+        df_all_freq = pd.concat(freq_data_list, ignore_index=True)
+        df_all_freq.to_csv(os.path.join(output_dir, "frequency_domain_data.csv"), index=False)
+        
+        with pd.ExcelWriter(os.path.join(output_dir, "full_results.xlsx")) as writer:
+            df_summary.to_excel(writer, sheet_name="Summary", index=False)
+            df_force.to_excel(writer, sheet_name="Force_Data", index=False)
+            df_all_freq.to_excel(writer, sheet_name="Frequency_Domain", index=False)
+    else:
+        with pd.ExcelWriter(os.path.join(output_dir, "full_results.xlsx")) as writer:
+            df_summary.to_excel(writer, sheet_name="Summary", index=False)
+            df_force.to_excel(writer, sheet_name="Force_Data", index=False)
         
     print(f"Results saved to {os.path.abspath(output_dir)}/")
     

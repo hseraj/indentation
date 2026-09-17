@@ -10,8 +10,8 @@ authors:
     orcid: "https://orcid.org/0000-0002-0039-7664"
   - family-names: "Sokolov"
     given-names: "Igor"
-version: "0.1.0"
-date-released: "2026-09-13"
+version: "0.2.0"
+date-released: "2026-09-17"
 license: MIT
 repository-code: "https://github.com/hseraj/indentation"
 keywords:
@@ -24,6 +24,8 @@ keywords:
   - standard-linear-solid
   - stress-relaxation
   - inverse-problem
+  - frequency-domain
+  - dynamic-modulus
 
 preferred-citation:
   type: article

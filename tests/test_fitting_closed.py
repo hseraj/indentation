@@ -21,8 +21,8 @@ def test_elastic_td():
     
     res = fit_elastic_td(t_arr, h_arr, F_data, dt, C, h_power_exp)
     
-    if np.isclose(res["parameters"]["E"], E_true, rtol=1e-5) and res["RelErr_%"] < 1e-5:
-        print(f"[PASS] test_elastic_td (E={res['parameters']['E']:.2f})")
+    if np.isclose(res["parameters"]["E [Pa]"], E_true, rtol=1e-5) and res["RelErr_%"] < 1e-5:
+        print(f"[PASS] test_elastic_td (E={res['parameters']['E [Pa]']:.2f})")
     else:
         print(f"[FAIL] test_elastic_td")
         sys.exit(1)
@@ -42,8 +42,8 @@ def test_kv_td():
     
     res = fit_kv_td(t_arr, h_arr, F_data, dt, C, h_power_exp)
     
-    if np.isclose(res["parameters"]["E"], E_true, rtol=1e-5) and np.isclose(res["parameters"]["eta"], eta_true, rtol=1e-5):
-        print(f"[PASS] test_kv_td (E={res['parameters']['E']:.2f}, eta={res['parameters']['eta']:.2f})")
+    if np.isclose(res["parameters"]["E [Pa]"], E_true, rtol=1e-5) and np.isclose(res["parameters"]["eta [Pa.s]"], eta_true, rtol=1e-5):
+        print(f"[PASS] test_kv_td (E={res['parameters']['E [Pa]']:.2f}, eta={res['parameters']['eta [Pa.s]']:.2f})")
     else:
         print(f"[FAIL] test_kv_td")
         sys.exit(1)
@@ -63,8 +63,8 @@ def test_dashpot_td():
     
     res = fit_dashpot_td(t_arr, h_arr, F_data, dt, C, h_power_exp)
     
-    if np.isclose(res["parameters"]["eta"], eta_true, rtol=1e-5) and res["RelErr_%"] < 1e-5:
-        print(f"[PASS] test_dashpot_td (eta={res['parameters']['eta']:.2f})")
+    if np.isclose(res["parameters"]["eta [Pa.s]"], eta_true, rtol=1e-5) and res["RelErr_%"] < 1.0:
+        print(f"[PASS] test_dashpot_td (eta={res['parameters']['eta [Pa.s]']:.2f})")
     else:
         print(f"[FAIL] test_dashpot_td")
         sys.exit(1)

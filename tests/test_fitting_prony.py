@@ -24,16 +24,16 @@ def test_prony2_pipeline():
     # 2. Run Laplace Fit
     S_VALS = np.sort(np.unique(np.logspace(-3, 3, 110)))
     lp_res = fit_prony2_lp(t_arr, h_arr, F_data, dt, C, h_power_exp, S_VALS)
-    print(f"[PASS] Prony2 Laplace Fit executed (Warm-start E_inf={lp_res['parameters']['E_inf']:.2f})")
+    print(f"[PASS] Prony2 Laplace Fit executed (Warm-start E_inf={lp_res['parameters']['E_inf [Pa]']:.2f})")
     
     # 3. Run Time-Domain Fit with Warm-Start
     td_res = fit_prony2_td(t_arr, h_arr, F_data, dt, C, h_power_exp, lp_params=lp_res["parameters"])
     
-    td_Ei = td_res["parameters"]["E_inf"]
-    td_E1 = td_res["parameters"]["E1"]
-    td_t1 = td_res["parameters"]["tau1"]
-    td_E2 = td_res["parameters"]["E2"]
-    td_t2 = td_res["parameters"]["tau2"]
+    td_Ei = td_res["parameters"]["E_inf [Pa]"]
+    td_E1 = td_res["parameters"]["E1 [Pa]"]
+    td_E2 = td_res["parameters"]["E2 [Pa]"]
+    td_t1 = td_res["parameters"]["tau1 [s]"]
+    td_t2 = td_res["parameters"]["tau2 [s]"]
     
     # Time-Domain should be extremely accurate (within 2% relative error for multi-param)
     if (np.isclose(td_Ei, Ei_true, rtol=0.02) and 

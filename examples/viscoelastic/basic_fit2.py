@@ -5,7 +5,7 @@ import os
 # Add project root to path so we can import the indentation package
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from indentation import run_fit, save_results, plot_comparison, get_probe_geometry
+from indentation import run_fit, save_results, plot_comparison, plot_frequency_domain, get_probe_geometry
 
 def main():
     print("--- Running Basic Fit Example ---")
@@ -48,7 +48,8 @@ def main():
         S_VALS=S_VALS,
         time_window=5.0,       
         refine_full_data=True,
-        smooth_window=15        # Analytical SG derivative will be used
+        smooth_window=15,
+        freq_max=1000.0
     )
     
 
@@ -66,7 +67,8 @@ def main():
     # Save to a folder inside the current example directory
     out_dir = os.path.join(os.path.dirname(__file__), "basic_fit2 output")
     save_results(results, "Standard_Linear_Solid", t_arr, F_data_noisy, output_dir=out_dir)
-    plot_comparison(results, t_arr, F_data_noisy, "Standard_Linear_Solid", output_dir=out_dir)
+    plot_comparison(results, t_arr, h_arr, F_data_noisy, "Standard_Linear_Solid", output_dir=out_dir)
+    plot_frequency_domain(results, "Standard_Linear_Solid", output_dir=out_dir)
     
     print("\nExample complete! Check the 'basic_fit2 output' folder.")
 

@@ -108,3 +108,55 @@ def rmsre(Fm, Fd, eps=1e-10):
     Fd = np.asarray(Fd, dtype=float)
     denom = np.abs(Fd) + eps
     return np.sqrt(np.mean(((Fm - Fd) / denom) ** 2))
+    
+def calculate_frequency_domain(model_name: str, params: dict, freq_hz: np.ndarray) -> dict:
+    """
+    Calculates the frequency-domain dynamic moduli (E', E'', |E*|, tan delta, zeta)
+    by evaluating the Carson transform E*(s) at s = i*omega.
+    """
+    from indentation.viscoelastic.models import MODELS
+    
+    model = MODELS[model_name]
+    E_star_func = model["E_star_func"]
+    param_names = model["param_names"]
+    
+    # Map the physical params dict (e.g., {"E [Pa]": 1e6}) to the lambda arguments (e.g., E=1e6)
+    args = []
+    for p_name in param_names:
+        found = False
+        for key, val in params.items():
+            if key.startswith(p_name):
+                args.append(val)
+                found = True
+                break
+        if not found:
+            raise ValueError(f"Parameter {p_name} not found in params dict: {params}")
+            
+    # Convert ordinary frequency (Hz) to angular frequency (rad/s)
+    omega = 2.0 * np.pi * np.asarray(freq_hz, dtype=float)
+    
+    # Substitute s = i * omega (1j in Python is the imaginary unit)
+    s = 1j * omega
+    
+    # Evaluate the Carson transform E*(s) = s * E(s) using complex numbers
+    E_star_complex = E_star_func(s, *args)
+    
+    # Extract dynamic properties
+    E_prime = np.real(E_star_complex)       # Storage Modulus E'
+    E_double_prime = np.imag(E_star_complex) # Loss Modulus E''
+    magnitude = np.abs(E_star_complex)       # |E*|
+    
+    # Calculate tan(delta) and damping ratio zeta safely (handle division by zero)
+    eps = 1e-12
+    tan_delta = np.where(np.abs(E_prime) < eps, np.inf, E_double_prime / E_prime)
+    zeta = tan_delta / 2.0
+    
+    return {
+        "Frequency_Hz": freq_hz,
+        "Angular_Frequency_rads": omega,
+        "Storage_Modulus_Pa": E_prime,
+        "Loss_Modulus_Pa": E_double_prime,
+        "Magnitude_Pa": magnitude,
+        "Loss_Tangent": tan_delta,
+        "Damping_Ratio": zeta
+    }

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "indentation"
-version = "0.1.0"
+version = "0.2.0"
 description = "A Python package for evaluating parameters of viscoelastic models in indentation tests."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -25,7 +25,9 @@ keywords = [
   "prony-series",
   "standard-linear-solid",
   "stress-relaxation",
-  "inverse-problem"
+  "inverse-problem",
+  "frequency-domain",
+  "dynamic-modulus",
 ]
 
 # PyPI Classifiers help categorize the project
